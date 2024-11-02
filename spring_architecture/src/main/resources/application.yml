@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: spring_architecture
+  jpa:
+    show-sql: true
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: root
