@@ -30,4 +30,6 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     @Modifying
     @Query("UPDATE Book b SET b.title = :#{#book.title}, b.isbn = :#{#book.isbn}, b.genre = :#{#book.genre}, b.publicationDate = :#{#book.publicationDate}, b.price = :#{#book.price} WHERE b.author = :author")
     void updateBookByAuthor(Book book, Author author);
+
+    boolean existsByAuthorId(UUID authorId);
 }

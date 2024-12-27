@@ -1,15 +1,21 @@
 package com.hexploretech.library_api.model;
 
+import com.hexploretech.library_api.controller.dto.AuthorDTO;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class Author {
     @Id
     @Column
@@ -25,7 +31,19 @@ public class Author {
     @Column(length = 50, nullable = false)
     private String nationality;
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
 //    @Transient
     @OneToMany(mappedBy = "author", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Book> books;
+
+    public AuthorDTO toDTO() {
+        return new AuthorDTO(this.id, this.name, this.birthDate, this.nationality);
+    }
 }
