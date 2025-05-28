@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import com.hexploretech.library_api.exceptions.OperationNotPermittedException;
@@ -66,6 +68,21 @@ public class AuthorService {
 		default:
 			return authorRepository.findAll();
 		}
+	}
+
+	public List<Author> searchAuthorsByExample(String name, String nationality, LocalDate birthDate) {
+		Author author = new Author();
+		author.setName(name);
+		author.setNationality(nationality);
+		author.setBirthDate(birthDate);
+
+		ExampleMatcher matcher = ExampleMatcher
+				.matching()
+				.withIgnoreNullValues()
+				.withIgnoreCase()
+				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+		Example<Author> authorExample = Example.of(author, matcher);
+		return authorRepository.findAll(authorExample);
 	}
 
 	public boolean hasBooks(UUID authorId) {

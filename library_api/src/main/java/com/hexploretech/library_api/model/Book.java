@@ -5,14 +5,17 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table
 @Data
 @ToString(exclude = "author")
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
     @Id
     @Column
@@ -35,15 +38,15 @@ public class Book {
     @Column(precision = 12)
     private double price;
 
-    @Column(name = "created_at")
-    @CreatedDate
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @LastModifiedDate
-    private LocalDate updatedAt;
-
     @JoinColumn(name = "id_author")
     @ManyToOne(cascade = CascadeType.ALL)
     private Author author;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

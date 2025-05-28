@@ -2,6 +2,7 @@ package com.hexploretech.library_api.controller;
 
 import com.hexploretech.library_api.controller.dto.AuthorDTO;
 import com.hexploretech.library_api.controller.dto.ErrorDTO;
+import com.hexploretech.library_api.controller.mappers.AuthorMapper;
 import com.hexploretech.library_api.exceptions.DuplicateRegistryException;
 import com.hexploretech.library_api.exceptions.OperationNotPermittedException;
 import com.hexploretech.library_api.model.Author;
@@ -18,18 +19,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/authors")
+@RequiredArgsConstructor
 public class AuthorController {
     private AuthorService authorService;
-
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
-    }
+	private AuthorMapper authorMapper;
 
     @PostMapping
-    public ResponseEntity<Object> saveAuthor(@RequestBody AuthorDTO author) {
-        Author authorEntity = author.toEntity();
+    public ResponseEntity<Object> saveAuthor(@RequestBody @Valid AuthorDTO author) {
+        Author authorEntity = authorMapper.toEntity(author);
 		try {
 			authorService.save(authorEntity);
 		} catch (DuplicateRegistryException e) {
@@ -53,11 +55,9 @@ public class AuthorController {
     public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable String authorId) {
         UUID authorUUID = UUID.fromString(authorId);
         Optional<Author> author = authorService.getAuthorById(authorUUID);
-        if (author.isPresent()) {
-            return ResponseEntity.ok(author.get().toDTO());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+		return authorService.getAuthorById(authorUUID).map(
+				authorEntity -> ResponseEntity.ok(authorMapper.toDTO(authorEntity))
+		).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{authorId}")
@@ -76,14 +76,19 @@ public class AuthorController {
     public ResponseEntity<List<AuthorDTO>> searchAuthors(@RequestParam(required = false) String name,
                                                          @RequestParam(required = false) String nationality,
                                                         @RequestParam(required = false) LocalDate birthDate) {
-        List<Author> authors = authorService.searchAuthors(name, nationality, birthDate);
+        List<Author> authors = authorService.searchAuthorsByExample(name, nationality, birthDate);
         return ResponseEntity.ok(authors.stream().map(Author::toDTO).toList());
     }
 
     @PutMapping("/{authorId}")
-    public ResponseEntity<Object> updateAuthor(@PathVariable String authorId, @RequestBody AuthorDTO author) {
+    public ResponseEntity<Object> updateAuthor(
+			@PathVariable
+			String authorId,
+			@RequestBody
+			@Valid
+			AuthorDTO author) {
         UUID authorUUID = UUID.fromString(authorId);
-        Author authorEntity = author.toEntity();
+        Author authorEntity = authorMapper.toEntity(author);
         authorEntity.setId(authorUUID);
         try {
             authorService.save(authorEntity);
