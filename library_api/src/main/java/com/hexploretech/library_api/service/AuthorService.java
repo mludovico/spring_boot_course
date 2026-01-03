@@ -23,8 +23,10 @@ public class AuthorService {
 	private final AuthorRepository authorRepository;
 	private final AuthorValidator authorValidator;
 	private final BookRepository bookRepository;
+	private final SecurityService securityService;
 
 	public void save(Author author) {
+		author.setUser(securityService.getLoggedUser());
 		authorValidator.validateAuthor(author);
 		authorRepository.save(author);
 	}

@@ -23,6 +23,6 @@ public record BookRegistrationDTO(
 		LocalDate publicationDate,
 		BookGenre genre,
 		BigDecimal price,
-		UUID authorId
+		UUID authorID
 		) {
 }

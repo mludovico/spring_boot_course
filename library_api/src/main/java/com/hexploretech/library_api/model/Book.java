@@ -42,6 +42,10 @@ public class Book {
     @ManyToOne(cascade = CascadeType.ALL)
     private Author author;
 
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
