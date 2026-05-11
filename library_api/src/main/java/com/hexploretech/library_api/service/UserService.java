@@ -21,10 +21,10 @@ public class UserService {
 	}
 
 	public User findByEmail(String email) {
-		return userRepository.findByEmail(email).orElse(null);
+		return userRepository.findUserByEmail(email);
 	}
 
 	public User findByUsername(String username) {
-		return userRepository.findByName(username).orElse(null);
+		return userRepository.findUserByName(username);
 	}
 }

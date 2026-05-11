@@ -2,18 +2,20 @@ package com.hexploretech.library_api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.hexploretech.library_api.security.CustomUserDetailService;
-import com.hexploretech.library_api.service.UserService;
+import com.hexploretech.library_api.security.JwtCustomAuthenticationFilter;
+import com.hexploretech.library_api.security.SocialLoginSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -21,23 +23,32 @@ import com.hexploretech.library_api.service.UserService;
 public class SecurityConfig {
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(AbstractHttpConfigurer::disable).formLogin(Customizer.withDefaults())
-				.httpBasic(Customizer.withDefaults())
-				.formLogin(configurer -> configurer.loginPage("/login").permitAll())
+	public SecurityFilterChain securityFilterChain(HttpSecurity http,
+			SocialLoginSuccessHandler socialLoginSuccessHandler,
+			JwtCustomAuthenticationFilter jwtCustomAuthenticationFilter) throws Exception {
+		return http.csrf(AbstractHttpConfigurer::disable).formLogin(configurer -> configurer.loginPage("/login"))
 				.authorizeHttpRequests(authorizeRequests -> {
 					authorizeRequests.requestMatchers("/login/**").permitAll();
+					authorizeRequests.requestMatchers(HttpMethod.POST, "/users/**").permitAll();
 					authorizeRequests.anyRequest().authenticated();
-				}).build();
+				}).oauth2Login(oauth2 -> oauth2.loginPage("/login").successHandler(socialLoginSuccessHandler))
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+				.addFilterAfter(jwtCustomAuthenticationFilter, BearerTokenAuthenticationFilter.class).build();
 	}
 
+	/// Configures prefix role in @PreAuthorize annotation
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(10);
+	public GrantedAuthorityDefaults grantedAuthorityDefaults() {
+		return new GrantedAuthorityDefaults(""); // Remove the ROLE_ prefix
 	}
 
+	/// Configures prefix scope in JWT token
 	@Bean
-	public UserDetailsService userDetailsService(UserService userService) {
-		return new CustomUserDetailService(userService);
+	public JwtAuthenticationConverter jwtAuthenticationConverter() {
+		var authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+		authoritiesConverter.setAuthorityPrefix("");
+		var converter = new JwtAuthenticationConverter();
+		converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+		return converter;
 	}
 }

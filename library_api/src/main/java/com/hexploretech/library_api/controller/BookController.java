@@ -3,6 +3,7 @@ package com.hexploretech.library_api.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.hexploretech.library_api.controller.dto.BookDTO;
@@ -40,6 +41,7 @@ public class BookController {
 	}
 
 	@GetMapping
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER', 'scope-a')")
 	public ResponseEntity<List<BookDTO>> getAllBooks() {
 		List<BookDTO> books = bookService.getBooks().stream().map(bookMapper::toDto).toList();
 		return ResponseEntity.ok(books);

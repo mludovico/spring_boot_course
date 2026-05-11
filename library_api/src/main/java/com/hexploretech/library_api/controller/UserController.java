@@ -8,6 +8,7 @@ import com.hexploretech.library_api.controller.mappers.UserMapper;
 import com.hexploretech.library_api.model.User;
 import com.hexploretech.library_api.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,7 +20,7 @@ public class UserController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public User save(@RequestBody UserDTO userDTO) {
+	public User save(@RequestBody @Valid UserDTO userDTO) {
 		return userService.createUser(userMapper.toEntity(userDTO));
 	}
 }

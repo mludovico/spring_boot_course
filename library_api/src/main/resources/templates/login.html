@@ -3,12 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <style>
+      * {
+          box-sizing: border-box;
+      }
+
+      body {
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: Arial, sans-serif;
+          background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 45%, #e9d5ff 100%);
+      }
+
+      .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+      }
+
+      form {
+          width: min(100%, 360px);
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          padding: 32px 28px;
+          border-radius: 18px;
+          background: #ffffff;
+          box-shadow: 0 12px 32px rgba(109, 40, 217, 0.18);
+      }
+
+      input[type="text"],
+      input[type="password"] {
+          width: 100%;
+          padding: 14px 16px;
+          border: 1px solid #d8b4fe;
+          border-radius: 12px;
+          background: #faf5ff;
+          color: #3b0764;
+          font-size: 15px;
+          outline: none;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      }
+
+      input[type="text"]::placeholder,
+      input[type="password"]::placeholder {
+          color: #8b5cf6;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+          border-color: #7c3aed;
+          background: #ffffff;
+          box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14);
+      }
+
+      input[type="submit"],
+      button[type="submit"] {
+          margin-top: 4px;
+          padding: 14px 16px;
+          border: none;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+          color: #ffffff;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 10px 20px rgba(109, 40, 217, 0.25);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      }
+
+      input[type="submit"]:hover,
+      button[type="submit"]:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 14px 24px rgba(109, 40, 217, 0.3);
+          filter: brightness(1.02);
+      }
+
+      input[type="submit"]:active,
+      button[type="submit"]:active {
+          transform: translateY(0);
+          box-shadow: 0 8px 16px rgba(109, 40, 217, 0.22);
+      }
+
+      .divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 4px 0;
+          color: #a78bfa;
+          font-size: 13px;
+      }
+
+      .divider::before,
+      .divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: #e9d5ff;
+      }
+
+      .btn-google {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 13px 16px;
+          border: 1.5px solid #d8b4fe;
+          border-radius: 12px;
+          background: #ffffff;
+          color: #6d28d9;
+          font-size: 15px;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+          transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .btn-google:hover {
+          background: #faf5ff;
+          border-color: #7c3aed;
+          box-shadow: 0 4px 14px rgba(109, 40, 217, 0.14);
+      }
+
+      .btn-google svg {
+          flex-shrink: 0;
+      }
+  </style>
 </head>
 <body>
-  <form th:action="@{/login}" th:method="post">
-    <input th:email="email" type="text" name="username" id="email" placeholder="Email">
-    <input th:type="password" th:name="password" th:id="password" placeholder="Password"/>
-    <input th:type="submit" value="Login"/>
-  </form>
+<form th:action="@{/login}" th:method="post">
+  <label class="sr-only" for="email">Email</label>
+  <input th:email="email" type="text" name="username" id="email" placeholder="Email">
+  <label class="sr-only" for="password">Password</label>
+  <input type="password" name="password" id="password" placeholder="Password"/>
+  <button type="submit" aria-label="Login">Login</button>
+
+  <div class="divider">or</div>
+
+  <a th:href="@{/oauth2/authorization/google}" class="btn-google">
+    <!-- Google 'G' logo -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335"
+            d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.09-6.09C34.46 3.07 29.5 1 24 1 14.82 1 7.07 6.48 3.69 14.18l7.1 5.52C12.43 13.61 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4"
+            d="M46.52 24.5c0-1.64-.15-3.22-.42-4.75H24v9h12.7c-.55 2.98-2.22 5.5-4.73 7.2l7.27 5.65C43.44 37.64 46.52 31.5 46.52 24.5z"/>
+      <path fill="#FBBC05"
+            d="M10.79 28.3A14.54 14.54 0 0 1 9.5 24c0-1.49.26-2.93.71-4.3l-7.1-5.52A23.93 23.93 0 0 0 0 24c0 3.86.92 7.5 2.54 10.72l8.25-6.42z"/>
+      <path fill="#34A853"
+            d="M24 47c5.98 0 11.01-1.98 14.68-5.38l-7.27-5.65c-2.01 1.35-4.59 2.15-7.41 2.15-6.26 0-11.57-4.11-13.21-9.82l-8.25 6.42C7.07 41.52 14.82 47 24 47z"/>
+      <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+    Sign in with Google
+  </a>
+</form>
 </body>
 </html>
