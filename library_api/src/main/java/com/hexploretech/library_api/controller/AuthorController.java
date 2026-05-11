@@ -3,7 +3,6 @@ package com.hexploretech.library_api.controller;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/authors")
 @PreAuthorize("hasRole('ADMIN')")
@@ -69,6 +70,11 @@ public class AuthorController {
 	})
 	public ResponseEntity<List<Author>> getAuthors(Authentication authentication) {
 		System.out.println("Authentication: " + authentication);
+		log.trace("trace log");
+		log.debug("debug log");
+		log.info("info log");
+		log.warn("warn log");
+		log.error("error log");
 		return ResponseEntity.ok(authorService.getAuthors());
 	}
 
