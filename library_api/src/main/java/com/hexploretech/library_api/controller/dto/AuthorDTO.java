@@ -3,11 +3,13 @@ package com.hexploretech.library_api.controller.dto;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
+@Schema(name = "Author")
 public record AuthorDTO(UUID uuid,
 		@NotBlank(message = "Name is required")
 		@Size(min = 2, max = 100, message = "Name must be at least 2 and most 100 characters")

@@ -21,6 +21,10 @@ import com.hexploretech.library_api.exceptions.OperationNotPermittedException;
 import com.hexploretech.library_api.model.Author;
 import com.hexploretech.library_api.service.AuthorService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -28,11 +32,20 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/authors")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
+@Tag(name = "Authors", description = "Endpoints for managing authors in the library system")
 public class AuthorController {
 	private final AuthorService authorService;
 	private final AuthorMapper authorMapper;
 
 	@PostMapping
+	@Operation(summary = "Create a new author", description = "Adds a new author to the library system. Requires ADMIN role.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Author created successfully"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+			@ApiResponse(responseCode = "422", description = "Unprocessable Entity - Validation errors"),
+			@ApiResponse(responseCode = "409", description = "Conflict - Duplicate registry")
+	})
 	public ResponseEntity<Object> saveAuthor(@RequestBody @Valid AuthorDTO author) {
 		Author authorEntity = authorMapper.toEntity(author);
 		try {
@@ -48,21 +61,42 @@ public class AuthorController {
 
 	@GetMapping
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@Operation(summary = "Get all authors", description = "Retrieves a list of all authors in the library system. Accessible by ADMIN and USER roles.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Authors retrieved successfully"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+	})
 	public ResponseEntity<List<Author>> getAuthors(Authentication authentication) {
 		System.out.println("Authentication: " + authentication);
 		return ResponseEntity.ok(authorService.getAuthors());
 	}
 
 	@GetMapping("/{authorId}")
+	@Operation(summary = "Get author by ID", description = "Retrieves an author by their unique ID. Accessible by ADMIN and USER roles.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Author retrieved successfully"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+			@ApiResponse(responseCode = "404", description = "Author not found")
+	})
 	public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable String authorId) {
 		UUID authorUUID = UUID.fromString(authorId);
-		Optional<Author> author = authorService.getAuthorById(authorUUID);
 		return authorService.getAuthorById(authorUUID)
 				.map(authorEntity -> ResponseEntity.ok(authorMapper.toDTO(authorEntity)))
 				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@DeleteMapping("/{authorId}")
+	@Operation(summary = "Delete an author", description = "Deletes an author by their unique ID. Requires ADMIN role.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "204", description = "Author deleted successfully"),
+			@ApiResponse(responseCode = "400", description = "Bad Request - Operation not permitted"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+			@ApiResponse(responseCode = "404", description = "Author not found"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")
+	})
 	public ResponseEntity<Object> deleteAuthor(@PathVariable String authorId) {
 		try {
 			authorService.delete(authorId);
@@ -75,6 +109,12 @@ public class AuthorController {
 	}
 
 	@GetMapping("/search")
+	@Operation(summary = "Search authors", description = "Search for authors by name")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Authors retrieved successfully"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
+	})
 	public ResponseEntity<List<AuthorDTO>> searchAuthors(@RequestParam(required = false) String name,
 			@RequestParam(required = false) String nationality, @RequestParam(required = false) LocalDate birthDate) {
 		List<Author> authors = authorService.searchAuthorsByExample(name, nationality, birthDate);
@@ -82,6 +122,14 @@ public class AuthorController {
 	}
 
 	@PutMapping("/{authorId}")
+	@Operation(summary = "Update an author", description = "Updates an existing author by their unique ID. Requires ADMIN role.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Author updated successfully"),
+			@ApiResponse(responseCode = "400", description = "Bad Request - Validation errors"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+			@ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+			@ApiResponse(responseCode = "404", description = "Author not found")
+	})
 	public ResponseEntity<Object> updateAuthor(@PathVariable String authorId, @RequestBody @Valid AuthorDTO author) {
 		UUID authorUUID = UUID.fromString(authorId);
 		Author authorEntity = authorMapper.toEntity(author);
